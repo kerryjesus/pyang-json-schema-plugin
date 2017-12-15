@@ -12,13 +12,38 @@ import json
 
 from pyang import plugin
 from pyang import statements
+from pyang import grammar
 from pyang import types
 from pyang import error
+
+json_stmts = [
+
+    # (<keyword>, <occurance when used>,
+    #  (<argument type name | None>, <substmts>),
+    #  <list of keywords where <keyword> can occur>)
+
+    ('key', '*',
+     ('string', None),
+     ['list']),
+]
+json_module_name = 'json-module'
 
 def pyang_plugin_init():
     plugin.register_plugin(JSONSchemaPlugin())
 
 class JSONSchemaPlugin(plugin.PyangPlugin):
+    # Register that we handle extensions from the YANG module
+    # 'ietf-yang-metadata'
+    #grammar.register_extension_module(json_module_name)
+
+    '''
+    # Register the special grammar
+    for (stmt, occurance, (arg, rules), add_to_stmts) in json_stmts:
+        grammar.add_stmt((json_module_name, stmt), (arg, rules))
+        grammar.add_to_stmts_rules(add_to_stmts,
+        [((json_module_name, stmt), occurance)])
+    '''
+
     def add_output_format(self, fmts):
         fmts['json-schema'] = self
 
@@ -47,6 +72,8 @@ class JSONSchemaPlugin(plugin.PyangPlugin):
 
     def emit(self, ctx, modules, fd):
         root_stmt = modules[0]
+        #logging.warning('emit:root:%s',root_stmt.arg)
+        #logging.basicConfig(level=logging.DEBUG)
         if ctx.opts.schema_debug:
             logging.basicConfig(level=logging.DEBUG)
             print("")
@@ -76,7 +103,7 @@ class JSONSchemaPlugin(plugin.PyangPlugin):
 
 def find_stmt_by_path(module, path):
     logging.debug("in find_stmt_by_path with: %s %s path: %s", module.keyword, module.arg, path)
-
+	
     if path is not None:
         spath = path.split("/")
         if spath[0] == '':
@@ -106,6 +133,7 @@ def produce_schema(root_stmt):
     result = {}
 
     for child in root_stmt.i_children:
+        #logging.warning('produce_schema:child.keyword:%s',child.keyword)
         if child.keyword in statements.data_definition_keywords:
             if child.keyword in producers:
                 logging.debug("keyword hit on: %s %s", child.keyword, child.arg)
@@ -154,13 +182,19 @@ def produce_leaf(stmt):
     return {arg: type_str}
 
 def produce_list(stmt):
-    logging.debug("in produce_list: %s %s", stmt.keyword, stmt.arg)
+    logging.debug("in produce_list: %s %s,len(substmt)=%s,ichildren=%s", stmt.keyword, stmt.arg,len(stmt.substmts),stmt.i_children[0].keyword,)
     arg = qualify_name(stmt)
-
-    if stmt.parent.keyword != "list":
-        result = {arg: {"type": "array", "items": []}}
+    if stmt.search_one('key') is None:
+        logging.warning('produce_list: potentially invalid list with no key element')
+        key = ''
     else:
-        result = {"type": "object", "properties": {arg: {"type": "array", "items": []}}}
+        key = stmt.search_one('key').arg
+    if stmt.parent.keyword != "list":
+        result = {arg: {"key":key,"type": "array", "items": []}}
+        logging.debug( 'result when parent keyword is not list, result:%s',result,)
+    else:
+        result = {"type": "object", "properties": {arg: {"type": "array", "items": [],"key":key}}}
+        logging.debug( 'result when parent keyword is list, result:%s',result,)
 
     if hasattr(stmt, 'i_children'):
         for child in stmt.i_children:
