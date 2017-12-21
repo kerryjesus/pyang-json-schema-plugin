@@ -227,11 +227,17 @@ def produce_leaf_list(stmt):
 def produce_container(stmt):
     logging.debug("in produce_container: %s %s", stmt.keyword, stmt.arg)
     arg = qualify_name(stmt)
+    config =True
+    if stmt.search_one('config') is None:
+        config = false
+    else:
+        logging.debug( "produce_container:%s", stmt.search_one('config').arg)
+        config = stmt.search_one('config').arg
 
     if stmt.parent.keyword != "list":
-        result = {arg: {"type": "object", "properties": {}}}
+        result = {arg: {"type": "object", "properties": {"isConfig":config}}}
     else:
-        result = {"type": "object", "properties": {arg:{"type": "object", "properties": {}}}}
+        result = {"type": "object", "properties": {arg:{"type": "object", "properties": {}},"isConfig":config}}
 
     if hasattr(stmt, 'i_children'):
         for child in stmt.i_children:
