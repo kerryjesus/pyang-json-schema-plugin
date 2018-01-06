@@ -131,7 +131,14 @@ def find_stmt_by_path(module, path):
 def produce_schema(root_stmt):
     logging.debug("in produce_schema: %s %s", root_stmt.keyword, root_stmt.arg)
     result = {}
-
+    enums_dict = {}
+    for enum, info in root_stmt.i_typedefs.iteritems():
+        enum_list = []
+        for tmp in info.substmts:
+            for val in tmp.substmts:
+                enum_list.append((val.arg, val.i_value))
+        enums_dict[enum] = enum_list
+        
     for child in root_stmt.i_children:
         #logging.warning('produce_schema:child.keyword:%s',child.keyword)
         if child.keyword in statements.data_definition_keywords:
@@ -144,6 +151,7 @@ def produce_schema(root_stmt):
         else:
             logging.debug("keyword not in data_definition_keywords: %s %s", child.keyword,
                           child.arg)
+    result['enums'] = enums_dict
     return result
 
 def produce_type(type_stmt):
