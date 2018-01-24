@@ -156,24 +156,27 @@ def produce_schema(root_stmt):
     return result
 
 def produce_type(type_stmt):
-    logging.debug("In produce_type with: %s %s", type_stmt.keyword, type_stmt.arg)
+    logging.debug("In produce_type with: %s %s", type_stmt.keyword, type_stmt.arg,)
     type_id = type_stmt.arg
 
     if types.is_base_type(type_id):
+        logging.debug("In produce_type base type: %s %s", type_stmt.keyword, type_stmt.arg)
         if type_id in _numeric_type_trans_tbl:
             type_str = numeric_type_trans(type_id)
         elif type_id in _other_type_trans_tbl:
             type_str = other_type_trans(type_id, type_stmt)
+            logging.debug("else case, type_str:%s",type_str)
         else:
             logging.debug("Missing mapping of base type: %s %s",
                           type_stmt.keyword, type_stmt.arg)
             type_str = {"type": "string"}
     elif hasattr(type_stmt, "i_typedef") and type_stmt.i_typedef is not None:
-        logging.debug("Found typedef type in: %s %s (typedef) %s",
+        logging.debug("In produce_type  Found typedef type in: %s %s (typedef) %s",
                       type_stmt.keyword, type_stmt.arg, type_stmt.i_typedef)
-        typedef_type_stmt = type_stmt.i_typedef.search_one('type')
-        typedef_type = produce_type(typedef_type_stmt)
-        type_str = typedef_type
+        #typedef_type_stmt = type_stmt.i_typedef.search_one('type')
+        #typedef_type = produce_type(typedef_type_stmt)
+        #type_str = typedef_type
+        type_str = {"type": type_stmt.arg}
     else:
         logging.debug("Missing mapping of: %s %s",
                       type_stmt.keyword, type_stmt.arg, type_stmt.i_typede)
@@ -191,7 +194,7 @@ def produce_leaf(stmt):
     return {arg: type_str}
 
 def produce_list(stmt):
-    logging.debug("in produce_list: %s %s,len(substmt)=%s,ichildren=%s", stmt.keyword, stmt.arg,len(stmt.substmts),stmt.i_children[0].keyword,)
+    logging.warning("in produce_list: %s %s,len(substmt)=%s,ichildren=%s", stmt.keyword, stmt.arg,len(stmt.substmts),stmt.i_children[0].keyword,)
     arg = qualify_name(stmt)
     if stmt.search_one('key') is None:
         logging.warning('produce_list: potentially invalid list with no key element')
@@ -219,14 +222,14 @@ def produce_list(stmt):
     return result
 
 def produce_leaf_list(stmt):
-    logging.debug("in produce_leaf_list: %s %s", stmt.keyword, stmt.arg)
+    logging.warning("in produce_leaf_list: %s %s", stmt.keyword, stmt.arg)
     arg = qualify_name(stmt)
     type_stmt = stmt.search_one('type')
     type_id = type_stmt.arg
 
     if types.is_base_type(type_id) or type_id in _other_type_trans_tbl:
         type_str = produce_type(type_stmt)
-        result = {arg: {"type": "array", "items": [type_str]}}
+        result = {arg: {"type": "array", "items": type_str}}
     else:
         logging.debug("Missing mapping of base type: %s %s, type: %s",
                       stmt.keyword, stmt.arg, type_id)
