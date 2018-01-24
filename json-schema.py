@@ -45,6 +45,7 @@ class JSONSchemaPlugin(plugin.PyangPlugin):
     '''
 
     def add_output_format(self, fmts):
+        self.multiple_modules = True
         fmts['json-schema'] = self
 
     def add_opts(self, optparser):
@@ -229,7 +230,7 @@ def produce_container(stmt):
     arg = qualify_name(stmt)
     config =True
     if stmt.search_one('config') is None:
-        config = false
+        config = False
     else:
         logging.debug( "produce_container:%s", stmt.search_one('config').arg)
         config = stmt.search_one('config').arg
