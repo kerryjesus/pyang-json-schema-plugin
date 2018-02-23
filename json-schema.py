@@ -306,9 +306,9 @@ _numeric_type_trans_tbl = {
     "int32": ("number", "int32"),
     "int64": ("integer", "int64"),
     "uint8": ("number", None),
-    "uint16": ("number", None),
-    "uint32": ("integer", "uint32"),
-    "uint64": ("integer", "uint64")
+    "uint16": ("uint16", None),
+    "uint32": ("uint32", "uint32"),
+    "uint64": ("uint64", "uint64")
     }
 
 def numeric_type_trans(dtype):
