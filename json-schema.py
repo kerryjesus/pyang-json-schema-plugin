@@ -360,6 +360,11 @@ def instance_identifier_trans(stmt):
     result = {"type": "string"}
     return result
 
+def decimal_trans(stmt):
+    logging.debug("in instance_identifier_trans with stmt %s %s", stmt.keyword, stmt.arg)
+    result = {"type": "float64"}
+    return result
+
 def leafref_trans(stmt):
     logging.debug("in leafref_trans with stmt %s %s", stmt.keyword, stmt.arg)
     # TODO: Need to resolve i_leafref_ptr here 
@@ -375,7 +380,8 @@ _other_type_trans_tbl = {
     "empty":                    empty_trans,
     "union":                    union_trans,
     "instance-identifier":      instance_identifier_trans,
-    "leafref":                  leafref_trans
+    "leafref":                  leafref_trans,
+    "decimal64":                decimal_trans
 }
 
 def other_type_trans(dtype, stmt):
