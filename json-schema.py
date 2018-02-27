@@ -194,7 +194,7 @@ def produce_leaf(stmt):
     return {arg: type_str}
 
 def produce_list(stmt):
-    logging.warning("in produce_list: %s %s,len(substmt)=%s,ichildren=%s", stmt.keyword, stmt.arg,len(stmt.substmts),stmt.i_children[0].keyword,)
+    logging.debug("in produce_list: %s %s,len(substmt)=%s,ichildren=%s", stmt.keyword, stmt.arg,len(stmt.substmts),stmt.i_children[0].keyword,)
     arg = qualify_name(stmt)
     if stmt.search_one('key') is None:
         logging.warning('produce_list: potentially invalid list with no key element')
@@ -222,7 +222,7 @@ def produce_list(stmt):
     return result
 
 def produce_leaf_list(stmt):
-    logging.warning("in produce_leaf_list: %s %s", stmt.keyword, stmt.arg)
+    logging.debug("in produce_leaf_list: %s %s", stmt.keyword, stmt.arg)
     arg = qualify_name(stmt)
     type_stmt = stmt.search_one('type')
     type_id = type_stmt.arg
@@ -306,9 +306,9 @@ _numeric_type_trans_tbl = {
     "int32": ("number", "int32"),
     "int64": ("integer", "int64"),
     "uint8": ("number", None),
-    "uint16": ("number", None),
-    "uint32": ("integer", "uint32"),
-    "uint64": ("integer", "uint64")
+    "uint16": ("uint16", None),
+    "uint32": ("uint32", "uint32"),
+    "uint64": ("uint64", "uint64")
     }
 
 def numeric_type_trans(dtype):
