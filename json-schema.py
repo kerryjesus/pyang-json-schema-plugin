@@ -304,7 +304,7 @@ _numeric_type_trans_tbl = {
     "int8": ("number", None),
     "int16": ("number", None),
     "int32": ("number", "int32"),
-    "int64": ("integer", "int64"),
+    "int64": ("int64", "int64"),
     "uint8": ("number", None),
     "uint16": ("uint16", None),
     "uint32": ("uint32", "uint32"),
