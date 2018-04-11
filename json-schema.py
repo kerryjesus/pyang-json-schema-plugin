@@ -246,10 +246,15 @@ def produce_container(stmt):
         logging.debug( "produce_container:%s", stmt.search_one('config').arg)
         config = stmt.search_one('config').arg
 
-    if stmt.parent.keyword != "list":
-        result = {arg: {"type": "object", "properties": {"isConfig":config}}}
+    if stmt.search_one(('ne-types', 'enterpriseDependent')) is None:
+	enterpriseDependent = False
     else:
-        result = {"type": "object", "properties": {arg:{"type": "object", "properties": {}},"isConfig":config}}
+	enterpriseDependent = stmt.search_one(('ne-types', 'enterpriseDependent')).arg
+
+    if stmt.parent.keyword != "list":
+        result = {arg: {"type": "object", "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent}}}
+    else:
+        result = {"type": "object", "properties": {arg:{"type": "object", "properties": {}},"isConfig":config, 'isEnterpriseDependent':enterpriseDependent}}
 
     if hasattr(stmt, 'i_children'):
         for child in stmt.i_children:
