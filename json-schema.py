@@ -201,11 +201,20 @@ def produce_list(stmt):
         key = ''
     else:
         key = stmt.search_one('key').arg
+    if stmt.search_one(('ne-types', 'ttlBased')) is None:
+	    ttlBased = False
+    else:
+	    ttlBased = stmt.search_one(('ne-types', 'ttlBased')).arg
+
+    if stmt.search_one(('ne-types', 'clusterKey')) is None:
+        clusterKey = "none"
+    else:
+        clusterKey = stmt.search_one(('ne-types', 'clusterKey')).arg
     if stmt.parent.keyword != "list":
-        result = {arg: {"key":key,"type": "array", "items": []}}
+        result = {arg: {"key":key,"type": "array", "items": [],'isTTLBased':ttlBased,'clusterKey':clusterKey}}
         logging.debug( 'result when parent keyword is not list, result:%s',result,)
     else:
-        result = {"type": "object", "properties": {arg: {"type": "array", "items": [],"key":key}}}
+        result = {"type": "object", "properties": {arg: {"type": "array", "items": [],"key":key,'isTTLBased':ttlBased,'clusterKey':clusterKey}}}
         logging.debug( 'result when parent keyword is list, result:%s',result,)
 
     if hasattr(stmt, 'i_children'):
