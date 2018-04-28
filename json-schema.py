@@ -187,11 +187,14 @@ def produce_type(type_stmt):
 def produce_leaf(stmt):
     logging.debug("in produce_leaf: %s %s", stmt.keyword, stmt.arg)
     arg = qualify_name(stmt)
-
     type_stmt = stmt.search_one('type')
+    description = stmt.search_one('description').arg
     type_str = produce_type(type_stmt)
-
-    return {arg: type_str}
+    if stmt.search_one(('ne-types', 'required')) is None:
+        required = 'false'
+    else:
+        required = stmt.search_one(('ne-types', 'required')).arg
+    return {arg: {'type': type_str['type'] , 'description':description, 'required' : required}}
 
 def produce_list(stmt):
     logging.debug("in produce_list: %s %s,len(substmt)=%s,ichildren=%s", stmt.keyword, stmt.arg,len(stmt.substmts),stmt.i_children[0].keyword,)
@@ -259,16 +262,19 @@ def produce_container(stmt):
     else:
         logging.debug( "produce_container:%s", stmt.search_one('config').arg)
         config = stmt.search_one('config').arg
-
-    if stmt.search_one(('ne-types', 'enterpriseDependent')) is None:
-	enterpriseDependent = False
+    if stmt.search_one('description') is None:
+        description = ''
     else:
-	enterpriseDependent = stmt.search_one(('ne-types', 'enterpriseDependent')).arg
+        description = stmt.search_one('description').arg
+    if stmt.search_one(('ne-types', 'enterpriseDependent')) is None:
+	    enterpriseDependent = False
+    else:
+	    enterpriseDependent = stmt.search_one(('ne-types', 'enterpriseDependent')).arg
 
     if stmt.parent.keyword != "list":
-        result = {arg: {"type": "object", "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent}}}
+        result = {arg: {"type": "object", "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'description': description}}}
     else:
-        result = {"type": "object", "properties": {arg:{"type": "object", "properties": {}},"isConfig":config, 'isEnterpriseDependent':enterpriseDependent}}
+        result = {"type": "object", "properties": {arg:{"type": "object", 'description': description, "properties": {}},"isConfig":config, 'isEnterpriseDependent':enterpriseDependent}}
 
     if hasattr(stmt, 'i_children'):
         for child in stmt.i_children:
@@ -320,9 +326,10 @@ producers = {
 
 _numeric_type_trans_tbl = {
     # https://tools.ietf.org/html/draft-ietf-netmod-yang-json-02#section-6
-    "int8": ("number", None),
-    "int16": ("number", None),
-    "int32": ("number", "int32"),
+    "int": ("int", None),
+    "int8": ("int8", None),
+    "int16": ("int16", None),
+    "int32": ("int32", "int32"),
     "int64": ("int64", "int64"),
     "uint8": ("number", None),
     "uint16": ("uint16", None),
