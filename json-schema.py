@@ -326,10 +326,10 @@ producers = {
 
 _numeric_type_trans_tbl = {
     # https://tools.ietf.org/html/draft-ietf-netmod-yang-json-02#section-6
-    "int": ("number", None),
-    "int8": ("number", None),
-    "int16": ("number", None),
-    "int32": ("number", "int32"),
+    "int": ("int", None),
+    "int8": ("int8", None),
+    "int16": ("int16", None),
+    "int32": ("int32", "int32"),
     "int64": ("int64", "int64"),
     "uint8": ("number", None),
     "uint16": ("uint16", None),
