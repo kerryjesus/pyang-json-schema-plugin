@@ -194,7 +194,12 @@ def produce_leaf(stmt):
         required = 'false'
     else:
         required = stmt.search_one(('ne-types', 'required')).arg
-    return {arg: {'type': type_str['type'] , 'description':description, 'required' : required}}
+
+    if stmt.search_one(('ne-types', 'nonUpdatable')) is None:
+        nonUpdatable = 'false'
+    else:
+        nonUpdatable = stmt.search_one(('ne-types', 'nonUpdatable')).arg
+    return {arg: {'type': type_str['type'] , 'description':description, 'required' : required, 'nonUpdatable': nonUpdatable}}
 
 def produce_list(stmt):
     logging.debug("in produce_list: %s %s,len(substmt)=%s,ichildren=%s", stmt.keyword, stmt.arg,len(stmt.substmts),stmt.i_children[0].keyword,)
