@@ -190,6 +190,8 @@ def produce_leaf(stmt):
     type_stmt = stmt.search_one('type')
     description = stmt.search_one('description').arg
     type_str = produce_type(type_stmt)
+    if ":" in arg:
+        arg = arg.split(":")[1]
     if stmt.search_one(('ne-types', 'required')) is None:
         required = 'false'
     else:
@@ -208,6 +210,10 @@ def produce_list(stmt):
 	    ttlBased = False
     else:
 	    ttlBased = stmt.search_one(('ne-types', 'ttlBased')).arg
+    if stmt.search_one(('uses')) is None:
+        uses = False
+    else:
+        logging.debug("in produce list - found uses - %s,key=%s",stmt.search_one('uses').arg,key)
 
     if stmt.search_one(('ne-types', 'metaData')) is None:
 	    metaData = "none"
@@ -243,6 +249,8 @@ def produce_leaf_list(stmt):
     arg = qualify_name(stmt)
     type_stmt = stmt.search_one('type')
     type_id = type_stmt.arg
+    if ":" in arg:
+        arg = arg.split(":")[1]
 
     if types.is_base_type(type_id) or type_id in _other_type_trans_tbl:
         type_str = produce_type(type_stmt)
