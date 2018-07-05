@@ -218,6 +218,7 @@ def produce_list(stmt):
         clusterKey = "none"
     else:
         clusterKey = stmt.search_one(('ne-types', 'clusterKey')).arg
+		
     if stmt.parent.keyword != "list":
         result = {arg: {"key":key,"type": "array", "items": [],'isTTLBased':ttlBased,'clusterKey':clusterKey,'metaData':metaData}}
         logging.debug( 'result when parent keyword is not list, result:%s',result,)
@@ -271,10 +272,15 @@ def produce_container(stmt):
     else:
 	    enterpriseDependent = stmt.search_one(('ne-types', 'enterpriseDependent')).arg
 
-    if stmt.parent.keyword != "list":
-        result = {arg: {"type": "object", "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'description': description}}}
+    if stmt.search_one(('ne-types', 'service')) is None:
+	service = "mano"
     else:
-        result = {"type": "object", "properties": {arg:{"type": "object", 'description': description, "properties": {}},"isConfig":config, 'isEnterpriseDependent':enterpriseDependent}}
+	service = stmt.search_one(('ne-types', 'service')).arg	
+
+    if stmt.parent.keyword != "list":
+        result = {arg: {"type": "object", "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'description': description, 'service':service}}}
+    else:
+        result = {"type": "object", "properties": {arg:{"type": "object", 'description': description, "properties": {}},"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'service':service}}
 
     if hasattr(stmt, 'i_children'):
         for child in stmt.i_children:
