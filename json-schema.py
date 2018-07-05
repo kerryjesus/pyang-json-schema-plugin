@@ -190,11 +190,22 @@ def produce_leaf(stmt):
     type_stmt = stmt.search_one('type')
     description = stmt.search_one('description').arg
     type_str = produce_type(type_stmt)
+    if ":" in arg:
+        arg = arg.split(":")[1]
     if stmt.search_one(('ne-types', 'required')) is None:
         required = 'false'
     else:
         required = stmt.search_one(('ne-types', 'required')).arg
-    return {arg: {'type': type_str['type'] , 'description':description, 'required' : required}}
+
+    if stmt.search_one(('ne-types', 'nonUpdatable')) is None:
+        nonUpdatable = 'false'
+    else:
+        nonUpdatable = stmt.search_one(('ne-types', 'nonUpdatable')).arg
+    if stmt.search_one(('ne-types', 'format')) is None:
+        format = ''
+    else:
+        format = stmt.search_one(('ne-types', 'format')).arg
+    return {arg: {'type': type_str['type'] , 'description':description, 'required' : required, 'nonUpdatable': nonUpdatable, 'format': format}}
 
 def produce_list(stmt):
     logging.debug("in produce_list: %s %s,len(substmt)=%s,ichildren=%s", stmt.keyword, stmt.arg,len(stmt.substmts),stmt.i_children[0].keyword,)
@@ -208,6 +219,10 @@ def produce_list(stmt):
 	    ttlBased = False
     else:
 	    ttlBased = stmt.search_one(('ne-types', 'ttlBased')).arg
+    if stmt.search_one(('uses')) is None:
+        uses = False
+    else:
+        logging.debug("in produce list - found uses - %s,key=%s",stmt.search_one('uses').arg,key)
 
     if stmt.search_one(('ne-types', 'metaData')) is None:
 	    metaData = "none"
@@ -244,6 +259,8 @@ def produce_leaf_list(stmt):
     arg = qualify_name(stmt)
     type_stmt = stmt.search_one('type')
     type_id = type_stmt.arg
+    if ":" in arg:
+        arg = arg.split(":")[1]
 
     if types.is_base_type(type_id) or type_id in _other_type_trans_tbl:
         type_str = produce_type(type_stmt)
@@ -271,6 +288,18 @@ def produce_container(stmt):
 	    enterpriseDependent = False
     else:
 	    enterpriseDependent = stmt.search_one(('ne-types', 'enterpriseDependent')).arg
+    if stmt.search_one(('ne-types', 'stateCombined')) is None:
+        stateCombined = False
+    else:
+        stateCombined = stmt.search_one(('ne-types', 'stateCombined')).arg
+    if stmt.search_one(('ne-types', 'hasComposite')) is None:
+        hasComposite = False
+    else:
+        hasComposite = stmt.search_one(('ne-types', 'hasComposite')).arg
+    if stmt.search_one(('ne-types', 'children')) is None:
+        children = ''
+    else:
+        children = stmt.search_one(('ne-types', 'children')).arg
 
     if stmt.search_one(('ne-types', 'service')) is None:
 	service = "mano"
@@ -278,9 +307,9 @@ def produce_container(stmt):
 	service = stmt.search_one(('ne-types', 'service')).arg	
 
     if stmt.parent.keyword != "list":
-        result = {arg: {"type": "object", "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'description': description, 'service':service}}}
+        result = {arg: {"type": "object", "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'description': description, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service}}}
     else:
-        result = {"type": "object", "properties": {arg:{"type": "object", 'description': description, "properties": {}},"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'service':service}}
+        result = {"type": "object", "properties": {arg:{"type": "object", 'description': description, "properties": {}},"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service}}
 
     if hasattr(stmt, 'i_children'):
         for child in stmt.i_children:
