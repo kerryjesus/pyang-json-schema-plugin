@@ -233,6 +233,7 @@ def produce_list(stmt):
         clusterKey = "none"
     else:
         clusterKey = stmt.search_one(('ne-types', 'clusterKey')).arg
+		
     if stmt.parent.keyword != "list":
         result = {arg: {"key":key,"type": "array", "items": [],'isTTLBased':ttlBased,'clusterKey':clusterKey,'metaData':metaData}}
         logging.debug( 'result when parent keyword is not list, result:%s',result,)
@@ -300,10 +301,15 @@ def produce_container(stmt):
     else:
         children = stmt.search_one(('ne-types', 'children')).arg
 
-    if stmt.parent.keyword != "list":
-        result = {arg: {"type": "object", "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'description': description, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children}}}
+    if stmt.search_one(('ne-types', 'service')) is None:
+	service = "mano"
     else:
-        result = {"type": "object", "properties": {arg:{"type": "object", 'description': description, "properties": {}},"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children}}
+	service = stmt.search_one(('ne-types', 'service')).arg	
+
+    if stmt.parent.keyword != "list":
+        result = {arg: {"type": "object", "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'description': description, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service}}}
+    else:
+        result = {"type": "object", "properties": {arg:{"type": "object", 'description': description, "properties": {}},"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service}}
 
     if hasattr(stmt, 'i_children'):
         for child in stmt.i_children:
