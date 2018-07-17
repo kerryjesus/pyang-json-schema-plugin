@@ -302,14 +302,16 @@ def produce_container(stmt):
         children = stmt.search_one(('ne-types', 'children')).arg
 
     if stmt.search_one(('ne-types', 'service')) is None:
-	service = "mano"
+		service = "mano"
     else:
-	service = stmt.search_one(('ne-types', 'service')).arg	
-
+		service = stmt.search_one(('ne-types', 'service')).arg	
+    dependentService = ""
+    if stmt.search_one(('ne-types', 'dependentService')) is not None:
+        dependentService = stmt.search_one(('ne-types', 'dependentService')).arg
     if stmt.parent.keyword != "list":
-        result = {arg: {"type": "object", "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'description': description, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service}}}
+        result = {arg: {"type": "object", "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'description': description, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service, 'dependentService': dependentService}}}
     else:
-        result = {"type": "object", "properties": {arg:{"type": "object", 'description': description, "properties": {}},"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service}}
+        result = {"type": "object", "properties": {arg:{"type": "object", 'description': description, "properties": {}},"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service, 'dependentService': dependentService}}
 
     if hasattr(stmt, 'i_children'):
         for child in stmt.i_children:
