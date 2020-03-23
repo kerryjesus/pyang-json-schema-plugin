@@ -196,7 +196,6 @@ def produce_leaf(stmt):
         required = 'false'
     else:
         required = stmt.search_one(('ne-types', 'required')).arg
-
     if stmt.search_one(('ne-types', 'nonUpdatable')) is None:
         nonUpdatable = 'false'
     else:
@@ -205,7 +204,11 @@ def produce_leaf(stmt):
         format = ''
     else:
         format = stmt.search_one(('ne-types', 'format')).arg
-    return {arg: {'type': type_str['type'] , 'description':description, 'required' : required, 'nonUpdatable': nonUpdatable, 'format': format}}
+    if stmt.search_one(('ne-types', 'urlTag')) is None:
+        urlTag = 'false'
+    else:
+        urlTag = stmt.search_one(('ne-types', 'urlTag')).arg
+    return {arg: {'type': type_str['type'] , 'description':description, 'required' : required, 'nonUpdatable': nonUpdatable, 'format': format, 'urlTag': urlTag}}
 
 def produce_list(stmt):
     logging.debug("in produce_list: %s %s,len(substmt)=%s,ichildren=%s", stmt.keyword, stmt.arg,len(stmt.substmts),stmt.i_children[0].keyword,)
@@ -284,6 +287,10 @@ def produce_container(stmt):
         description = ''
     else:
         description = stmt.search_one('description').arg
+    if stmt.search_one(('ne-types', 'hasTag')) is None:
+        hasTag = False
+    else:
+        hasTag = stmt.search_one(('ne-types', 'hasTag')).arg
     if stmt.search_one(('ne-types', 'enterpriseDependent')) is None:
 	    enterpriseDependent = False
     else:
@@ -320,14 +327,14 @@ def produce_container(stmt):
     if stmt.search_one(('ne-types', 'service')) is None:
 		service = "mano"
     else:
-		service = stmt.search_one(('ne-types', 'service')).arg	
+		service = stmt.search_one(('ne-types', 'service')).arg
     dependentService = ""
     if stmt.search_one(('ne-types', 'dependentService')) is not None:
         dependentService = stmt.search_one(('ne-types', 'dependentService')).arg
     if stmt.parent.keyword != "list":
-        result = {arg: {"type": "object", "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'description': description, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service, 'dependentService': dependentService, 'dbType':dbType, 'dbBased':dbBased, 'restBased': restBased, 'isObject': isObject}}}
+        result = {arg: {"type": "object", "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'description': description, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service, 'dependentService': dependentService, 'dbType':dbType, 'dbBased':dbBased, 'restBased': restBased, 'isObject': isObject, 'hasTag': hasTag}}}
     else:
-        result = {"type": "object", "properties": {arg:{"type": "object", 'description': description, "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service, 'dependentService': dependentService, 'dbType':dbType, 'dbBased':dbBased, 'restBased':restBased, 'isObject': isObject}}}}
+        result = {"type": "object", "properties": {arg:{"type": "object", 'description': description, "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service, 'dependentService': dependentService, 'dbType':dbType, 'dbBased':dbBased, 'restBased':restBased, 'isObject': isObject, 'hasTag': hasTag}}}}
     if hasattr(stmt, 'i_children'):
         for child in stmt.i_children:
             if child.keyword in producers:
