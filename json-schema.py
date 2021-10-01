@@ -208,7 +208,11 @@ def produce_leaf(stmt):
         urlTag = 'false'
     else:
         urlTag = stmt.search_one(('ne-types', 'urlTag')).arg
-    return {arg: {'type': type_str['type'] , 'description':description, 'required' : required, 'nonUpdatable': nonUpdatable, 'format': format, 'urlTag': urlTag}}
+    if stmt.search_one(('ne-types', 'index')) is None:
+        index = 'false'
+    else:
+        index = stmt.search_one(('ne-types', 'index')).arg
+    return {arg: {'type': type_str['type'] , 'description':description, 'required' : required, 'nonUpdatable': nonUpdatable, 'format': format, 'urlTag': urlTag, 'index': index}}
 
 def produce_list(stmt):
     logging.debug("in produce_list: %s %s,len(substmt)=%s,ichildren=%s", stmt.keyword, stmt.arg,len(stmt.substmts),stmt.i_children[0].keyword,)
