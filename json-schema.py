@@ -295,6 +295,10 @@ def produce_container(stmt):
         hasTag = False
     else:
         hasTag = stmt.search_one(('ne-types', 'hasTag')).arg
+    if stmt.search_one(('ne-types', 'noBngId')) is None:
+        noBngId = False
+    else:
+        noBngId = stmt.search_one(('ne-types', 'noBngId')).arg
     if stmt.search_one(('ne-types', 'hasOp')) is None:
         hasOp = False
     else:
@@ -340,9 +344,9 @@ def produce_container(stmt):
     if stmt.search_one(('ne-types', 'dependentService')) is not None:
         dependentService = stmt.search_one(('ne-types', 'dependentService')).arg
     if stmt.parent.keyword != "list":
-        result = {arg: {"type": "object", "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'description': description, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service, 'dependentService': dependentService, 'dbType':dbType, 'dbBased':dbBased, 'restBased': restBased, 'isObject': isObject, 'hasTag': hasTag, 'hasOp': hasOp}}}
+        result = {arg: {"type": "object", "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'description': description, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service, 'dependentService': dependentService, 'dbType':dbType, 'dbBased':dbBased, 'restBased': restBased, 'isObject': isObject, 'hasTag': hasTag, 'hasOp': hasOp, 'noBngId': noBngId}}}
     else:
-        result = {"type": "object", "properties": {arg:{"type": "subobject", 'description': description, "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service, 'dependentService': dependentService, 'dbType':dbType, 'dbBased':dbBased, 'restBased':restBased, 'isObject': isObject, 'hasTag': hasTag, 'hasOp': hasOp}}}}
+        result = {"type": "object", "properties": {arg:{"type": "subobject", 'description': description, "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service, 'dependentService': dependentService, 'dbType':dbType, 'dbBased':dbBased, 'restBased':restBased, 'isObject': isObject, 'hasTag': hasTag, 'hasOp': hasOp, 'noBngId': noBngId}}}}
     if hasattr(stmt, 'i_children'):
         for child in stmt.i_children:
             if child.keyword in producers:
