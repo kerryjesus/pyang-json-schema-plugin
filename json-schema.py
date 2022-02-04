@@ -323,6 +323,25 @@ def produce_container(stmt):
         restBased = True
     else:
         restBased = stmt.search_one(('ne-types', 'restBased')).arg
+
+    if restBased == True:
+        if stmt.search_one(('ne-types', 'restCreateBased')) is None:
+            restCreateBased = True
+        else:
+            restCreateBased = stmt.search_one(('ne-types', 'restCreateBased')).arg
+        if stmt.search_one(('ne-types', 'restUpdateBased')) is None:
+            restUpdateBased = True
+        else:
+            restUpdateBased = stmt.search_one(('ne-types', 'restUpdateBased')).arg
+        if stmt.search_one(('ne-types', 'restDeleteBased')) is None:
+            restDeleteBased = True
+        else:
+            restDeleteBased = stmt.search_one(('ne-types', 'restDeleteBased')).arg
+    else:
+        restCreateBased = False
+        restUpdateBased = False
+        restDeleteBased = False
+
     if stmt.search_one(('ne-types', 'isObject')) is None:
         isObject = True
     else:
@@ -344,9 +363,9 @@ def produce_container(stmt):
     if stmt.search_one(('ne-types', 'dependentService')) is not None:
         dependentService = stmt.search_one(('ne-types', 'dependentService')).arg
     if stmt.parent.keyword != "list":
-        result = {arg: {"type": "object", "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'description': description, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service, 'dependentService': dependentService, 'dbType':dbType, 'dbBased':dbBased, 'restBased': restBased, 'isObject': isObject, 'hasTag': hasTag, 'hasOp': hasOp, 'noBngId': noBngId}}}
+        result = {arg: {"type": "object", "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'description': description, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service, 'dependentService': dependentService, 'dbType':dbType, 'dbBased':dbBased, 'restBased': restBased, 'isObject': isObject, 'hasTag': hasTag, 'hasOp': hasOp, 'noBngId': noBngId, 'restCreateBased': restCreateBased, 'restUpdateBased': restUpdateBased, 'restDeleteBased': restDeleteBased}}}
     else:
-        result = {"type": "object", "properties": {arg:{"type": "subobject", 'description': description, "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service, 'dependentService': dependentService, 'dbType':dbType, 'dbBased':dbBased, 'restBased':restBased, 'isObject': isObject, 'hasTag': hasTag, 'hasOp': hasOp, 'noBngId': noBngId}}}}
+        result = {"type": "object", "properties": {arg:{"type": "subobject", 'description': description, "properties": {"isConfig":config, 'isEnterpriseDependent':enterpriseDependent, 'isStateCombined': stateCombined, 'hasComposite': hasComposite, 'children': children, 'service':service, 'dependentService': dependentService, 'dbType':dbType, 'dbBased':dbBased, 'restBased':restBased, 'isObject': isObject, 'hasTag': hasTag, 'hasOp': hasOp, 'noBngId': noBngId, 'restCreateBased': restCreateBased, 'restUpdateBased': restUpdateBased, 'restDeleteBased': restDeleteBased}}}}
     if hasattr(stmt, 'i_children'):
         for child in stmt.i_children:
             if child.keyword in producers:
